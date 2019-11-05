@@ -22,6 +22,10 @@ spacy = "*"
 en-core-web-lg = {file = "https://github.com/explosion/spacy-models/releases/download/en_core_web_lg-2.2.0/en_core_web_lg-2.2.0.tar.gz"}
 textacy = "*"
 cytoolz = "*"
+requests = "*"
+en-vectors-web-lg = {file = "https://github.com/explosion/spacy-models/releases/download/en_vectors_web_lg-2.1.0/en_vectors_web_lg-2.1.0.tar.gz"}
+lemminflect = "*"
+reportlab = "*"
 
 [requires]
 python_version = "3.7"
