@@ -13,15 +13,15 @@ from tracery.modifiers import base_english
 from ..abstracts import Generator
 
 
-class AbreviationGenerator(Generator):
+class AcronymGenerator(Generator):
     splitting_pattern = re.compile('[A-Z][^A-Z]*')
 
-    def __init__(self, abbrev: str):
-        self.abbrev = abbrev
+    def __init__(self, acronym: str):
+        self.acronym = acronym
 
         dictionary: Dict[str, List[str]] = {}
 
-        splitted = self.splitting_pattern.findall(abbrev)
+        splitted = self.splitting_pattern.findall(acronym)
 
         self.length = len(splitted)
 
@@ -52,16 +52,17 @@ class AbreviationGenerator(Generator):
                                   alignment=TA_CENTER))
 
         doc.build([Paragraph(
-            '<font size="18">{}</font>'.format(self.abbrev), styles['Normal_CENTER']),
+            '<font size="18">{}</font>'.format(self.acronym),
+            styles['Normal_CENTER']),
             Spacer(1, 12)] +
             [Paragraph(p, styles['Normal_CENTER'])
              for p in self.generate_text().split('\n')])
 
 
 def main():
-    gen = AbreviationGenerator('NaNoGenMo')
+    gen = AcronymGenerator('NaNoGenMo')
 
-    gen.save_to_file('abbrev_gen.pdf')
+    gen.save_to_file('acronym_gen.pdf')
 
 
 if __name__ == "__main__":
