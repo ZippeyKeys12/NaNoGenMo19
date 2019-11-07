@@ -1,0 +1,302 @@
+contractions:
+  could not have: couldn't've
+  I am about to: I'm'a
+  I am going to: I'm'o
+  might not have: might't've
+  must not have: mustn't've
+  of the clock: o'clock
+  should not have: shouldn't've
+  we would have: we'd've
+  who would have: who'd've
+  you all would have: y'all'd've
+
+  am not: amn't
+  any more: anymore
+  are not: ain't
+
+  can not: can't
+  cannot: can't
+  could have: couldn've
+  could not: couldn't
+
+  dare not: dasn't
+  dared not: daren't
+  did not: ain't
+  do not: don't
+  does not: don't
+
+  everyone is: everyone's
+
+  fixing to: finna
+  going to: finna
+
+  give me: gimme
+  gonna: going to
+  gon't: go not
+  got to: gotta
+
+  had not: hadn't
+  has not: ain't
+  have not: ain't
+  have to: hafta
+  he had: he'd
+  he would: he'd
+  he will: he'll
+  he has: he's
+  he is: he's
+  he have: he've
+  how did: how'd
+  how would: how'd
+  how will: how'll
+  how are: how're
+  how is: how's
+
+  I would: I'd
+  I will: I'll
+  I am: I'm
+  I have: I've
+  is not: isn't
+  it would: it'd
+  it will: it'll
+  it shall: it'll
+  it is: it's
+  it has: it's
+  it was: \'twas
+
+  let us: let's
+
+  may not: mayn't
+  may have: may've
+  might not: mightn't
+  might have: might've
+  must not: mustn't
+  must have: must've
+
+  near by: nearby
+  need not: needn't
+
+  ought not: oughtn't
+
+  per cent: percent
+
+  shall not: shan't
+  she would: she'd
+  she shall: she'll
+  she will: she'll
+  she is: she's
+  she has: she's
+
+  should have: should've
+  should not: shouldn't
+  somebody is: somebody's
+  somebody has: somebody's
+  someone is: someone's
+  someone has: someone's
+  something is: something's
+  something has: something's
+  so are: so're
+
+  that will: that'll
+  that are: that're
+  that is: that's
+  that has: that's
+  there had: there'd
+  there would: there'd
+  there shall: there'll
+  there will: there'll
+  there are: there're
+  there is: there's
+  there has: there's
+  these are: these're
+  they had: they'd
+  they would: they'd
+  they shall: they'll
+  they will: they'll
+  they are: they're
+  they were: they're
+  they have: they've
+  this is: this's
+  those are: those're
+  to have: to've
+
+  was not: wasn't
+  we had: we'd
+  we would: we'd
+  we did: we'd
+  we will: we'll
+  we are: we're
+  we have: we've
+  were not: weren't
+  what did: what'd
+  what shall: what'll
+  what will: what'll
+  what all: what'll
+  what are: what're
+  what were: what're
+  what has: what's
+  what is: what's
+  what does: what's
+  what have: what've
+  when has: when's
+  when is: when's
+  where did: where'd
+  where are: where're
+  where has: where's
+  where is: where's
+  where does: where's
+  where have: where've
+  which has: which's
+  which is: which's
+  who would: who'd
+  who had: who'd
+  who did: who'd
+  who shall: who'll
+  who will: who'll
+  who are: who're
+  who has: who's
+  who is: who's
+  who does: who's
+  who have: who've
+  why is: why's
+  will not: won't
+  would have: would've
+  would not: wouldn't
+
+  you all: y'all
+  you had: you'd
+  you would: you'd
+  you shall: you'll
+  you will: you'll
+  you are: you're
+  you have: you've
+
+acronyms:
+  if I remember correctly: IIRC
+  in my opinion: IMO
+  in my honest opinion: IMHO
+  be right back: BRB
+
+brit_am:
+  aeroplane: airplane
+  aluminium: aluminum
+  ambassadour: ambassador
+  ampoule: ampule
+  analogue: analog
+  apophthegm: apothegm
+  appall: appal
+  armour: armor
+  arse: ass
+  axe: ax
+  behaviour: behavior
+  behoove: behove
+  boogeyman: bogeyman
+  bussed: bused
+  busses: buses
+  bussing: busing
+  calliper: caliper
+  cancelled: canceled
+  carburettor: carburetor
+  catalogue: catalog
+  chamomile: camomile
+  charivari: shivaree
+  cheque: check
+  chilli: chili
+  colour: color
+  colourful: colorful
+  colourless: colorless
+  complexioned: complected
+  connection: connexion
+  coulter: colter
+  counsellor: counselor
+  cruellest: cruelest
+  dialogue: dialog
+  disorientated: disoriented
+  distill: distil
+  doughnut: donut
+  draught: draft
+  dullness: dulness
+  emperour: emperor
+  encyclopaedia: encyclopedia
+  enroll: enrol
+  enrollment: enrolment
+  enthrall: enthral
+  enthrallment: enthralment
+  favour: favor
+  favourite: favorite
+  favourable: favorable
+  fillet: filet
+  flavour: flavor
+  fulfill: fulfil
+  fulfillment: fulfilment
+  fullness: fulness
+  furore: furor
+  glamour: glamor
+  glamourous: glamorous
+  glycerine: glycerin
+  governour: govenror
+  gramme: gram
+  grotty: grody
+  harbour: harbor
+  haulier: hauler
+  hearken: harken
+  homologue: homolog
+  honour: honor
+  honourable: honorable
+  humour: humor
+  humourous: humorous
+  idyll: idyl
+  inferiour: inferior
+  install: instal
+  installment: instalment
+  instill: instil
+  jewellery: jewelery
+  labelled: labeled
+  labour: labor
+  labourious: laborious
+  manoeuvre: maneuvor
+  mediaeval: medieval
+  midriff: midrif
+  modelling: modeling
+  monologue: monolog
+  mould: mold
+  moult: molt
+  moustache: mustache
+  neighbour: neighbor
+  neurone: neuron
+  omelette: omelet
+  orientated: oriented
+  persnickety: pernickety
+  perturbatour: perturbator
+  plough: plow
+  primaeval: primeval
+  programme: program
+  quarrelled: quarreled
+  quint: quin
+  rumour: rumor
+  savour: savor
+  scallywag: scalawag
+  signalling: signaling
+  skillful: skilful
+  sledge: sled
+  smoulder: smolder
+  speciality: specialty
+  splendour: splendor
+  sulphate: sulfate
+  sulphur: sulfur
+  thralldom: thraldom
+  through: thru
+  tonne: ton
+  towards: toward
+  traveller: traveler
+  travelling: traveling
+  vigour: vigor
+  vigourous: vigorous
+  whiskey: whisky
+  willful: wilful
+  yoghourt: yogurt
+  yoghurt: yogurt
+
+filler:
+  - basically
+  - literally
+  - very
