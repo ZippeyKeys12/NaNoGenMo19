@@ -1,3 +1,7 @@
+import re
+
+from nltk.corpus import wordnet as wn
+
 PENN_TO_UNIVERSAL = {
     '#': 'SYM',
     '$': 'SYM',
@@ -47,3 +51,23 @@ PENN_TO_UNIVERSAL = {
     'WRB': 'ADV',
     '``': 'PUNCT'
 }
+
+UNIVERSAL_TO_LETTER = {
+    "ADJ": wn.ADJ,
+    "ADV": wn.ADV,
+    "NOUN": wn.NOUN,
+    "VERB": wn.VERB
+}
+
+UNIVERSAL_TO_DATAMUSE = {
+    "ADJ": 'adj',
+    "ADV": 'adv',
+    "NOUN": 'n',
+    "VERB": 'v'
+}
+
+WHITESPACE_PATTERN = re.compile(r'\s+')
+
+
+def word_count(text: str):
+    return len(WHITESPACE_PATTERN.split(text))

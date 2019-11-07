@@ -37,26 +37,32 @@ class AcronymGenerator(Generator):
 
         self.rule = '#{}.capitalize#'.format('.capitalize# #'.join(splitted))
 
-    def generate_text(self) -> str:
+    def generate_text(self, length: int = 50000) -> str:
         return '\n'.join((self.grammar.flatten(self.rule)
-                          for _ in range(math.ceil(50000 / self.length))))
+                          for _ in range(math.ceil(length / self.length))))
 
-    def save_to_file(self, name):
-        doc = SimpleDocTemplate(name, pagesize=letter,
-                                rightMargin=72, leftMargin=72,
-                                topMargin=72, bottomMargin=18)
+    def save_to_file(self, file_name: str, length: int = 50000):
+        text = self.generate_text(length)
 
-        styles = getSampleStyleSheet()
-        styles.add(ParagraphStyle(name='Normal_CENTER',
-                                  parent=styles['Normal'],
-                                  alignment=TA_CENTER))
+        if file_name.endswith('.pdf'):
+            doc = SimpleDocTemplate(file_name, pagesize=letter,
+                                    rightMargin=72, leftMargin=72,
+                                    topMargin=72, bottomMargin=18)
 
-        doc.build([Paragraph(
-            '<font size="18">{}</font>'.format(self.acronym),
-            styles['Normal_CENTER']),
-            Spacer(1, 12)] +
-            [Paragraph(p, styles['Normal_CENTER'])
-             for p in self.generate_text().split('\n')])
+            styles = getSampleStyleSheet()
+            styles.add(ParagraphStyle(name='Normal_CENTER',
+                                      parent=styles['Normal'],
+                                      alignment=TA_CENTER))
+
+            doc.build([Paragraph(
+                '<font size="18">{}</font>'.format(self.acronym),
+                styles['Normal_CENTER']),
+                Spacer(1, 12)] +
+                [Paragraph(p, styles['Normal_CENTER'])
+                 for p in text.split('\n')])
+        else:
+            with open(file_name, 'w') as f:
+                f.write(text)
 
 
 def main():

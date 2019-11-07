@@ -14,27 +14,22 @@ from textacy.preprocessing import (normalize_hyphenated_words,
 from tracery import Grammar
 from tracery.modifiers import base_english
 
+from ..abstracts import Generator
+from ..util import UNIVERSAL_TO_LETTER
 
-class POSifiedText(markovify.Text):
-    separator = "::"
+
+class POSifiedText(markovify.Text, Generator):
+    separator = "<:>"
     clean_pattern = re.compile('[\n_]')
     tracery_pattern = re.compile('^#.+#$')
 
-    def __init__(self, input_text, state_size=2, chain=None,
-                 parsed_sentences=None, well_formed=True, reject_reg=''):
+    def __init__(self, input_text: str, state_size: int = 2):
         nltk.download('brown')
         nltk.download('gutenberg')
         self.nlp = spacy.load('en_core_web_lg')
 
         self.synonyms: Dict[str, List[str]] = defaultdict(list)
         self.entities: Dict[str, List[str]] = defaultdict(list)
-
-        self.pos_converter = {
-            "ADJ": wn.ADJ,
-            "ADV": wn.ADV,
-            "NOUN": wn.NOUN,
-            "VERB": wn.VERB
-        }
 
         input_text = pipe(
             input_text,
@@ -46,9 +41,8 @@ class POSifiedText(markovify.Text):
             normalize_whitespace
         )
 
-        markovify.Text.__init__(self, input_text, state_size, chain,
-                                parsed_sentences, False,
-                                well_formed, reject_reg)
+        markovify.Text.__init__(
+            self, input_text, state_size, retain_original=False)
 
         self.grammar = Grammar({**self.synonyms, **self.entities})
         self.grammar.add_modifiers(base_english)
@@ -88,12 +82,16 @@ class POSifiedText(markovify.Text):
                         'ml': word.orth_
                     })
 
+                    syns = []
                     if len(r.json()) > 0:
-                        self.synonyms[word.orth_] = [
+                        syns = [
                             obj['word'] for obj in r.json()
                             if 'syn' in obj['tags'] and
-                            self.pos_converter[word.pos_] in obj['tags'] and
+                            UNIVERSAL_TO_LETTER[word.pos_] in obj['tags'] and
                             'prop' not in obj['tags']]
+
+                    if len(syns) > 0:
+                        self.synonyms[word.orth_] = syns
                     else:
                         self.synonyms[word.orth_] = False
 
@@ -137,6 +135,20 @@ class POSifiedText(markovify.Text):
             sentence.append(self.grammar.flatten(word))
 
         return " ".join(sentence).replace('_', ' ')
+
+    def generate_text(self, length: int = 50000) -> str:
+        text = ''
+
+        while len(text.split(' ')) < length:
+            text += self.make_sentence()
+
+        return text
+
+    def save_to_file(self, file_name: str, length: int = 50000):
+        text = self.generate_text(length)
+
+        with open(file_name, 'w') as f:
+            f.write(text)
 
 
 def main():
