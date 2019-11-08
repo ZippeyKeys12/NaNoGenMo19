@@ -27,6 +27,8 @@ en-vectors-web-lg = {file = "https://github.com/explosion/spacy-models/releases/
 lemminflect = "*"
 reportlab = "*"
 pyyaml = "*"
+textblob = "*"
+sumy = "*"
 
 [requires]
 python_version = "3.7"

@@ -1,6 +1,10 @@
 import re
+from typing import FrozenSet, cast
 
+from nltk.corpus import stopwords
 from nltk.corpus import wordnet as wn
+from spacy.lang.en.stop_words import STOP_WORDS
+from sumy.utils import get_stop_words as getsw
 
 PENN_TO_UNIVERSAL = {
     '#': 'SYM',
@@ -69,5 +73,28 @@ UNIVERSAL_TO_DATAMUSE = {
 WHITESPACE_PATTERN = re.compile(r'\s+')
 
 
-def word_count(text: str):
+def word_count(text: str) -> int:
     return len(WHITESPACE_PATTERN.split(text))
+
+
+def get_stop_words(lang: str) -> FrozenSet[str]:
+    tmp = list(stopwords.words(lang))
+    tmp.extend(getsw(lang))
+
+    if lang == 'english':
+        tmp.extend(STOP_WORDS)
+
+    return cast(FrozenSet[str], frozenset(tmp))
+
+
+# https://stackoverflow.com/questions/20193555/finding-combinations-to-the-provided-sum-value
+def list_sums(lst, target, with_replacement=False):
+    def _a(idx, l, r, t, w):
+        if t == sum(x[1] for x in l):
+            r.append(l)
+        elif t < sum(x[1] for x in l):
+            return []
+        for u in range(idx, len(lst)):
+            _a(u if w else (u + 1), l + [(u, lst[u])], r, t, w)
+        return r
+    return _a(0, [], [], target, with_replacement)
