@@ -1,16 +1,13 @@
-import re
-import textwrap
 from collections import OrderedDict
-from itertools import combinations
 from os import path
 from typing import Dict, List, Optional, Set, Tuple, cast
 
 import nltk
 import pycorpora
-import requests
 import spacy
 import yaml
 from cytoolz.functoolz import pipe
+from datamuse import Datamuse
 from nltk import sent_tokenize
 from nltk.corpus import wordnet as wn
 from spacy.tokens import Token
@@ -18,20 +15,17 @@ from sumy.nlp.stemmers import Stemmer
 from sumy.nlp.tokenizers import Tokenizer
 from sumy.parsers.plaintext import PlaintextParser
 from sumy.summarizers.lsa import LsaSummarizer
-from textacy.preprocessing import (normalize_hyphenated_words,
-                                   normalize_quotation_marks,
-                                   normalize_unicode, normalize_whitespace)
 
-from ..abstracts import Generator
+from ..abstracts import Processor
+from ..shared import CleaningProcessor, TextWrapProcessor
 from ..util import (UNIVERSAL_TO_DATAMUSE, WHITESPACE_PATTERN, get_stop_words,
                     list_sums, word_count)
 
 
-class SpreadShredGenerator(Generator):
+class SpreadShredProcessor(Processor):
     separator = "<:>"
-    clean_pattern = re.compile('[\n_]')
 
-    def __init__(self, input_text: str):
+    def __init__(self, input_texts: str):
         nltk.download('punkt')
 
         self.nlp = spacy.load('en_core_web_lg')
@@ -39,9 +33,11 @@ class SpreadShredGenerator(Generator):
         self.summarizer = LsaSummarizer(Stemmer('english'))
         self.summarizer.stop_words = get_stop_words('english')
 
+        self.cleaner = CleaningProcessor()
+
         self.synonyms: Dict[str, Optional[List[str]]] = {}
-        if path.isfile('src/spreadr_shreddr/syns.yaml'):
-            with open('src/spreadr_shreddr/syns.yaml', 'r') as f:
+        if path.isfile('src/syns.yaml'):
+            with open('src/syns.yaml', 'r') as f:
                 self.synonyms = yaml.safe_load(f)
 
         if self.synonyms is None:
@@ -74,55 +70,40 @@ class SpreadShredGenerator(Generator):
         self.brits = data['brit_am']
         self.murcans = {v: k for k, v in self.brits.items()}
 
-        def clean(text: str):
-            return pipe(
-                text,
-                lambda x: self.clean_pattern.sub(' ', x),
-                normalize_hyphenated_words,
-                normalize_quotation_marks,
-                normalize_unicode,
-                normalize_whitespace
-            )
-
-        self.cleaned_text: str = clean(input_text)
-
-        with open('spreadr_shreddr_base.txt', 'w') as f:
-            f.write(self.cleaned_text)
-
-        self.paragraphs = {clean(p): word_count(clean(p))
-                           for p in input_text.split('\n\n')}
-
         changed = False
-        for sent in sent_tokenize(self.cleaned_text):
-            for index, word in enumerate(self.nlp(sent)):
-                orth = word.orth_.lower()
-                key = self.separator.join((orth, word.tag_))
+        api = Datamuse()
+        for text in input_texts:
+            text >>= self.cleaner
 
-                if key not in self.synonyms:
-                    changed = True
-                    syns: List[str] = []
+            for sent in sent_tokenize(text):
+                for index, word in enumerate(self.nlp(sent)):
+                    orth = word.orth_.lower()
+                    key = self.separator.join((orth, word.tag_))
 
-                    if (word.pos_ in UNIVERSAL_TO_DATAMUSE and
-                            len(wn.synsets(orth)) <= 1):
-                        r = requests.get('https://api.datamuse.com/words',
-                                         params={'ml': orth})
+                    if key not in self.synonyms:
+                        changed = True
+                        syns: List[str] = []
 
-                        if len(r.text) > 0:
-                            syns = self.get_synonyms(
-                                ' '.join(sent), (index, word), r.json())
+                        if (word.pos_ in UNIVERSAL_TO_DATAMUSE and
+                                len(wn.synsets(orth)) <= 1):
+                            res = api.words(ml=orth)
 
-                    if len(syns) > 0:
-                        self.synonyms[key] = syns
-                    else:
-                        self.synonyms[key] = None
+                            if len(res) > 0:
+                                syns = self._get_synonyms(
+                                    ' '.join(sent), (index, word), res)
 
-                if changed:
-                    changed = False
-                    with open('src/spreadr_shreddr/syns.yaml', 'a') as f:
-                        f.write(yaml.dump({key: self.synonyms[key]}))
+                        if len(syns) > 1:
+                            self.synonyms[key] = syns
+                        else:
+                            self.synonyms[key] = None
 
-    def get_synonyms(self, sentence: str, word: Tuple[int, Token],
-                     candidates: list) -> List[str]:
+                    if changed:
+                        changed = False
+                        with open('src/syns.yaml', 'a') as f:
+                            f.write(yaml.dump({key: self.synonyms[key]}))
+
+    def _get_synonyms(self, sentence: str, word: Tuple[int, Token],
+                      candidates: list) -> List[str]:
         def tagged(x):
             return ('tags' in x and 'syn' in x['tags'] and
                     'prop' not in x['tags'] and word_count(x['word']) == 1)
@@ -180,37 +161,53 @@ class SpreadShredGenerator(Generator):
 
         return ' '.join(str(s) for s in sents)
 
-    def generate_text(self, word_length: int = None,
-                      char_length: int = None) -> str:
-        text = self.cleaned_text
+    def process_text(self, input_text: str, **kwargs) -> str:
+        cleaned_text = input_text >> self.cleaner
 
         # Setup
+        try:
+            char_length = kwargs['char_length']
+        except KeyError:
+            char_length = None
+
         dchar_change = 0
         if char_length is not None:
-            dchar_change = char_length - len(text)
+            dchar_change = char_length - len(cleaned_text)
+
+        try:
+            word_length = kwargs['word_length']
+        except KeyError:
+            word_length = None
 
         dword_change = 0
         if word_length is not None:
-            dword_change = word_length - word_count(text)
+            dword_change = word_length - word_count(cleaned_text)
             print('a', dword_change)
 
         # Summarize paragraphs
         if dword_change < 0:
-            paragraphs = sorted(
-                self.paragraphs, key=lambda x: len(PlaintextParser.from_string(
+            paragraphs = {x: word_count(x) for x in (
+                p >> self.cleaner for p in input_text.split('\n\n'))}
+            pgraph_keys = sorted(
+                paragraphs, key=lambda x: len(PlaintextParser.from_string(
                     x, Tokenizer('english')).document.sentences), reverse=True)
 
             ideals: List[Tuple[int, str, str]] = []
             d = {}
             for len_s in range(1, len(PlaintextParser.from_string(
-                    paragraphs[0], Tokenizer('english')).document.sentences)):
-                for p in paragraphs:
+                    pgraph_keys[0], Tokenizer('english')).document.sentences)):
+                for p in pgraph_keys:
                     if len(PlaintextParser.from_string(
-                            p, Tokenizer('english')).document.sentences) <= len_s:
+                            p, Tokenizer('english')
+                    ).document.sentences) <= len_s:
                         break
 
                     repl = self.summarize(p, len_s)
-                    diff = word_count(repl) - self.paragraphs[p]
+
+                    if repl.count('"') % 2 != 0:
+                        continue
+
+                    diff = word_count(repl) - paragraphs[p]
 
                     if diff == 0:
                         continue
@@ -219,14 +216,11 @@ class SpreadShredGenerator(Generator):
 
                     ideals.append((diff, p, repl))
 
-            # with open('aaa.yaml', 'w') as f:
-            #     yaml.dump(d, f)
-
             # Check paragraph combinations
             possible = list_sums((x[0] for x in ideals), dword_change)
             if len(possible) > 0:
                 for diff, p, repl in min(possible, key=len):
-                    text = text.replace(p, '{}\n\n'.format(repl))
+                    cleaned_text = cleaned_text.replace(p, '{}'.format(repl))
 
                     dword_change -= diff
 
@@ -235,12 +229,14 @@ class SpreadShredGenerator(Generator):
             else:
                 excluded: Set[str] = set()
                 for diff, p, repl in sorted(
-                        ideals, key=lambda x: abs(dword_change - x[0]), reverse=True):
+                        ideals, key=lambda x: abs(
+                            dword_change - x[0]), reverse=True):
                     if (abs(dword_change - diff) < abs(dword_change) and
                             p not in excluded):
                         excluded.add(p)
 
-                        text = text.replace(p, '{}\n\n'.format(repl))
+                        cleaned_text = cleaned_text.replace(
+                            p, '{}'.format(repl))
 
                         dword_change -= diff
 
@@ -257,7 +253,7 @@ class SpreadShredGenerator(Generator):
             for k, v in self.patterns.items():
                 if dword_change == 0 and dchar_change == 0:
                     print('b', dword_change)
-                    return text
+                    return cleaned_text
 
                 if v == '':
                     diff = -word_count(k)
@@ -265,8 +261,8 @@ class SpreadShredGenerator(Generator):
                     diff = word_count(v) - word_count(k)
 
                 if(abs(dword_change - diff) < abs(dword_change) and
-                        text.find(space(k)) != -1):
-                    text = text.replace(space(k), space(v), 1)
+                        cleaned_text.find(space(k)) != -1):
+                    cleaned_text = cleaned_text.replace(space(k), space(v), 1)
 
                     dword_change -= diff
                     if char_length is not None:
@@ -276,36 +272,34 @@ class SpreadShredGenerator(Generator):
                     done.add(k)
 
         # Synonyms and spellings for char count
-        for word in self.nlp(text):
+        for word in self.nlp(cleaned_text):
             if dword_change == 0 and dchar_change == 0:
                 print('c', dword_change)
-                return text
+                return cleaned_text
 
-            while dchar_change != 0 and text.find(space(word.orth_)) != -1:
+            while dchar_change != 0 and cleaned_text.find(space(word.orth_)) != -1:
                 (repl, dchar_change) = self.replace_synonym(
                     word, dchar_change)
-                text = text.replace(space(word.orth_), space(repl), 1)
+                cleaned_text = cleaned_text.replace(
+                    space(word.orth_), space(repl), 1)
 
-            while dchar_change != 0 and text.find(space(word.orth_)) != -1:
+            while dchar_change != 0 and cleaned_text.find(space(word.orth_)) != -1:
                 (repl, dchar_change) = self.brit_am(word, dchar_change)
-                text = text.replace(space(word.orth_), space(repl), 1)
+                cleaned_text = cleaned_text.replace(
+                    space(word.orth_), space(repl), 1)
 
         print('d', dword_change)
-        return text
-
-    def save_to_file(self, file_name: str, length: int = 50000):
-        text = self.generate_text(length)
-
-        with open(file_name, 'w') as f:
-            f.write('\n'.join(textwrap.wrap(text)))
+        return cleaned_text
 
 
 def main():
     text = open('src/synonymize/hounds_sherlock.txt').read().replace('_', '')
 
-    gen = SpreadShredGenerator(text)
+    text = SpreadShredProcessor([text]).process_text(
+        text, word_length=50000) >> TextWrapProcessor()
 
-    gen.save_to_file('spreadr_shreddr.txt')
+    with open('spreadr_shreddr.txt', 'w') as f:
+        f.write(text)
 
 
 if __name__ == "__main__":
