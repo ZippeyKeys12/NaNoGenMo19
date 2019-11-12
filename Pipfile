@@ -38,6 +38,8 @@ python-datamuse = "*"
 textdistance = "*"
 scikit-learn = "*"
 numba = "*"
+faker = "*"
+us = "*"
 
 [requires]
 python_version = "3.7"

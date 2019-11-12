@@ -38,21 +38,13 @@ class AcronymGenerator(Generator):
         self.rule = '#{}.capitalize#'.format('.capitalize# #'.join(splitted))
 
     def generate_text(self, **kwargs) -> str:
-        try:
-            length = kwargs['length']
-        except KeyError:
-            length = None
-        length = length or 50000
+        length = kwargs.get('length', 50000)
 
         return '\n'.join((self.grammar.flatten(self.rule)
                           for _ in range(math.ceil(length / self.length))))
 
     def save_to_file(self, file_name: str, **kwargs):
-        try:
-            length = kwargs['length']
-        except KeyError:
-            length = None
-        length = length or 50000
+        length = kwargs.get('length', 50000)
 
         text = self.generate_text(length=length)
 
@@ -87,11 +79,17 @@ class AcronymProcessor(Processor):
         self.grammar.add_modifiers(base_english)
 
     def process_text(self, input_text: str, **kwargs) -> str:
+        topics = kwargs.get('topics', None)
+
         splitted = self.splitting_pattern.findall(input_text)
 
         dictionary: Dict[str, List[str]] = {}
         for start in (x for x in splitted if x not in self.grammar.symbols):
-            res = self.api.words(sp='{}*'.format(start), max=1000)
+            if topics is None:
+                res = self.api.words(sp='{}*'.format(start), max=1000)
+            else:
+                res = self.api.words(
+                    sp='{}*'.format(start), topics=topics, max=1000)
 
             dictionary[start] = [obj['word'] for obj in res]
 

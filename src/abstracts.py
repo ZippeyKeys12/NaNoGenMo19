@@ -8,10 +8,6 @@ class Generator:
     def generate_text(self, **kwargs) -> str:
         raise NotImplementedError()
 
-    @abstractmethod
-    def save_to_file(self, file_name: str, **kwargs):
-        raise NotImplementedError()
-
 
 class Processor:
     @abstractmethod

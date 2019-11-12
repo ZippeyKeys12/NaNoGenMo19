@@ -14,12 +14,10 @@ class SoundorProcessor(Processor):
         self.nlp = spacy.load('en_core_web_lg')
         self.pin = Pincelate()
         self.temperature = temperature
+        self.cleaner = CleaningProcessor()
 
     def process_text(self, input_text: str, **kwargs) -> str:
-        try:
-            temperature = kwargs['temperature']
-        except KeyError:
-            temperature = self.temperature or .25
+        temperature = kwargs.get('temperature', self.temperature or .25)
 
         result: List[str] = []
 
@@ -30,8 +28,7 @@ class SoundorProcessor(Processor):
             else:
                 new_token = pipe(
                     token.orth_.lower(),
-                    self.pin.soundout,
-                    lambda x: self.pin.spell(x, temperature)
+                    lambda x: self.pin.manipulate(x, temperature=temperature)
                 )
 
                 if token.orth_ == token.orth_.capitalize():

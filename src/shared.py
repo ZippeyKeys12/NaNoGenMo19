@@ -31,15 +31,10 @@ class TextWrapProcessor(Processor):
         self.replace_whitespace = replace_whitespace
 
     def process_text(self, input_text: str, **kwargs) -> str:
-        try:
-            width = kwargs['width']
-        except KeyError:
-            width = self.width or 70
+        width = kwargs.get('width', self.width or 70)
 
-        try:
-            repl_white = kwargs['replace_whitespace']
-        except KeyError:
-            repl_white = self.replace_whitespace or True
+        repl_white = kwargs.get(
+            'replace_whitespace', self.replace_whitespace or True)
 
         return '\n'.join(textwrap.wrap(
             input_text, width, replace_whitespace=repl_white))

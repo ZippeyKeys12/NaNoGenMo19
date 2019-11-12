@@ -165,19 +165,13 @@ class SpreadShredProcessor(Processor):
         cleaned_text = input_text >> self.cleaner
 
         # Setup
-        try:
-            char_length = kwargs['char_length']
-        except KeyError:
-            char_length = None
+        char_length = kwargs.get('char_length', None)
 
         dchar_change = 0
         if char_length is not None:
             dchar_change = char_length - len(cleaned_text)
 
-        try:
-            word_length = kwargs['word_length']
-        except KeyError:
-            word_length = None
+        word_length = kwargs.get('word_length', None)
 
         dword_change = 0
         if word_length is not None:
