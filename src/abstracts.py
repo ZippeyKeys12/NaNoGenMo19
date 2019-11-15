@@ -46,7 +46,7 @@ class ComposedProcessor(Processor):
 
 class Bot:
     @abstractmethod
-    def info(self) -> Dict[str, str]:
+    def info(self) -> str:
         raise NotImplementedError()
 
     @abstractmethod

@@ -15,9 +15,10 @@ class BetweenLookGenerator(Generator):
 
         self.grammar = Grammar({
             'origin': ['{quote} #name# {verb}.',
-                       '{quote} #question_verb# #name#',
+                       # '{quote} {verb} #name#',
                        '#name# {verb}, {quote}'],
-            'question_verb': ['questioned', 'asked', 'inquired'],
+            'neutral': ['said'],
+            'question': ['questioned', 'asked', 'inquired'],
             'exclaim': ['exclaimed', 'shouted'],
             'name': ['#They#', '#name#']
         })
@@ -58,9 +59,10 @@ class BetweenLookGenerator(Generator):
                 elif msg[-2] == '!':
                     msg_type = 'exclaim'
 
-            text += self.grammar.flatten(
-                '\n{}#origin#'.format(info)
-            ).format(quote=msg, verb=msg_type)
+            rule = self.grammar.flatten('\n{}#origin#'.format(info))
+            rule = rule.format(quote=msg, verb='#{}#'.format(msg_type))
+
+            text += self.grammar.flatten(rule)
 
         return text
 
