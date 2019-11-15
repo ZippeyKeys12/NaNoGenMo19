@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from abc import abstractmethod
+from typing import Dict
 
 
 class Generator:
@@ -44,6 +45,10 @@ class ComposedProcessor(Processor):
 
 
 class Bot:
+    @abstractmethod
+    def info(self) -> Dict[str, str]:
+        raise NotImplementedError()
+
     @abstractmethod
     def respond(self, text: str, **kwargs) -> str:
         raise NotImplementedError()

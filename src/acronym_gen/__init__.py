@@ -14,7 +14,7 @@ from ..abstracts import Generator, Processor
 
 
 class AcronymGenerator(Generator):
-    splitting_pattern = re.compile('[A-Z][^A-Z]*')
+    splitting_pattern = re.compile(r'[A-Z][^A-Z]*')
 
     def __init__(self, acronym: str):
         self.acronym = acronym
@@ -70,7 +70,7 @@ class AcronymGenerator(Generator):
 
 
 class AcronymProcessor(Processor):
-    splitting_pattern = re.compile('[A-Z][^A-Z]*')
+    splitting_pattern = re.compile(r'[A-Z][^A-Z]*')
 
     def __init__(self):
         self.api = Datamuse()

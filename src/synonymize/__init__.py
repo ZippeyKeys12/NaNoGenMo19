@@ -15,13 +15,13 @@ from tracery import Grammar
 from tracery.modifiers import base_english
 
 from ..abstracts import Generator
-from ..util import UNIVERSAL_TO_LETTER
+from ..util import UNIVERSAL_TO_LETTER, word_count
 
 
 class POSifiedText(markovify.Text, Generator):
     separator = "<:>"
-    clean_pattern = re.compile('[\n_]')
-    tracery_pattern = re.compile('^#.+#$')
+    clean_pattern = re.compile(r'[\n_]')
+    tracery_pattern = re.compile(r'^#.+#$')
 
     def __init__(self, input_text: str, state_size: int = 2):
         nltk.download('brown')
@@ -136,16 +136,21 @@ class POSifiedText(markovify.Text, Generator):
 
         return " ".join(sentence).replace('_', ' ')
 
-    def generate_text(self, length: int = 50000) -> str:
-        text = ''
+    def generate_text(self, **kwargs) -> str:
+        length = kwargs.get('length', 50000)
 
-        while len(text.split(' ')) < length:
-            text += self.make_sentence()
+        text = ''
+        w_count = 0
+
+        while w_count < length:
+            sent = self.make_sentence()
+            text += sent
+            w_count += word_count(sent)
 
         return text
 
     def save_to_file(self, file_name: str, length: int = 50000):
-        text = self.generate_text(length)
+        text = self.generate_text(length=length)
 
         with open(file_name, 'w') as f:
             f.write(text)

@@ -11,7 +11,7 @@ from .abstracts import Processor
 
 
 class CleaningProcessor(Processor):
-    clean_pattern = re.compile('[\n_]')
+    clean_pattern = re.compile(r'[\n_]')
 
     def process_text(self, input_text: str, **kwargs) -> str:
         return pipe(

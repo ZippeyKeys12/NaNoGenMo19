@@ -1,7 +1,7 @@
 import datetime
 import random
 import re
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Optional
 
 from faker import Faker
 from faker.providers import address, profile
@@ -17,12 +17,16 @@ class AutBioGenerator(Generator):
     raw_pattern = re.compile(r'^\(\((.+)\)\)$')
     state_pattern = re.compile(r', ([A-Z]{2}) [0-9]{5}$')
 
-    def __init__(self):
+    def __init__(self, seed: Optional[int] = None):
         self.cleaner = CleaningProcessor()
 
         self.fake = Faker()
         self.fake.add_provider(address)
         self.fake.add_provider(profile)
+
+        if seed:
+            random.seed(seed)
+            self.fake.seed_instance(seed + 1)
 
         dictionary: Dict[str, List[str]] = {
             'cred_romance': ['USA Today bestselling',
@@ -116,7 +120,7 @@ class AutBioGenerator(Generator):
         }.get(details['sex'],
               '[They:they][Them:them][Their:their][Theirs:theirs]')
 
-        details['is_gay'] = random.random() < .023
+        details['is_gay'] = random.random() < .0195
         details['is_married'] = random.random() < .43
         details['has_kids'] = random.random() < .74
 
@@ -163,7 +167,7 @@ class AutBioGenerator(Generator):
         details = kwargs.get('details', self.generate_details())
 
         text = """
-            {name} is a #cred_{genre}# author of #good_adj# {genre} #books.raw#
+            {name} is a #cred_{genre}# #author.raw# of #good_adj# {genre} #books.raw#
             who lives in {state}
         """
 
