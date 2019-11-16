@@ -61,8 +61,9 @@ class BetweenLookGenerator(Generator):
 
             rule = self.grammar.flatten('\n{}#origin#'.format(info))
             rule = rule.format(quote=msg, verb='#{}#'.format(msg_type))
+            rule = self.grammar.flatten(rule)
 
-            text += self.grammar.flatten(rule)
+            text += rule[0].capitalize()+rule[1:]
 
         return text
 
