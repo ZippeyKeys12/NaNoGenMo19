@@ -11,6 +11,7 @@ from us import states
 
 from ..abstracts import Generator
 from ..shared import CleaningProcessor
+from ..debbi import get_astrological_sign, get_zodiac_sign
 
 
 class AutBioGenerator(Generator):
@@ -51,11 +52,11 @@ class AutBioGenerator(Generator):
                          'breathtaking', 'beautiful', 'seminal'],
 
 
-            'married_and_kids': 'with #Their# #spouse# and #children#',
+            'married_and_kids': ['with #Their# #spouse# and #children#'],
 
-            'married': 'with #Their# #spouse#',
+            'married': ['with #Their# #spouse#'],
 
-            'kids': 'with #Their# #children#',
+            'kids': ['with #Their# #children#'],
             'children': ['#num_kids# kids', '#num_kids# #kid_type.s#',
                          '#kid_type#'],
             'kid_type': ['daughter', 'son'],
@@ -75,41 +76,9 @@ class AutBioGenerator(Generator):
             'clean': lambda x: x >> self.cleaner
         })
 
-    def get_astrological_sign(self, birthdate: datetime.date) -> str:
-        return {
-            1: 'capricorn' if birthdate.day < 20 else 'aquarius',
-            2: 'aquarius' if birthdate.day < 19 else 'pisces',
-            3: 'pisces' if birthdate.day < 21 else 'aries',
-            4: 'aries' if birthdate.day < 20 else 'taurus',
-            5: 'taurus'if birthdate.day < 21 else 'gemini',
-            6: 'gemini'if birthdate.day < 21 else 'cancer',
-            7: 'cancer'if birthdate.day < 23 else 'leo',
-            8: 'leo'if birthdate.day < 23 else 'virgo',
-            9: 'virgo'if birthdate.day < 23 else 'libra',
-            10: 'libra'if birthdate.day < 23 else 'scorpio',
-            11: 'scorpio' if (birthdate.day < 22) else 'sagittarius',
-            12: 'sagittarius' if (birthdate.day < 22) else 'capricorn'
-        }[birthdate.month]
-
-    def get_zodiac_sign(self, birthdate: datetime.date) -> str:
-        return {
-            0: 'rat',
-            1: 'ox',
-            2: 'tiger',
-            3: 'rabbit',
-            4: 'dragon',
-            5: 'snake',
-            6: 'horse',
-            7: 'goat',
-            8: 'monkey',
-            9: 'rooster',
-            10: 'dog',
-            11: 'pig'
-        }[(birthdate.year - 1900) % 12]
-
     def generate_details(self, **kwargs) -> dict:
         details: Dict[str, Any] = {
-            'genre': random.choice(['sci-fi', 'fantasy'])
+            'genre': random.choice(['fantasy'])
         }
 
         details.update(self.fake.profile(sex=None))
@@ -145,8 +114,8 @@ class AutBioGenerator(Generator):
         details['state'] = states.lookup(addr.group(1)).name
 
         details['signs'] = {
-            'astrological': self.get_astrological_sign(details['birthdate']),
-            'zodiac': self.get_zodiac_sign(details['birthdate'])
+            'astrological': get_astrological_sign(details['birthdate']),
+            'zodiac': get_zodiac_sign(details['birthdate'])
         }
 
         if random.random() < .3:

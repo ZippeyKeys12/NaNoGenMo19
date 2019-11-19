@@ -1,3 +1,4 @@
+import datetime
 import re
 from typing import FrozenSet, cast
 
@@ -5,6 +6,8 @@ from nltk.corpus import stopwords
 from nltk.corpus import wordnet as wn
 from spacy.lang.en.stop_words import STOP_WORDS
 from sumy.utils import get_stop_words as getsw
+
+import spacy
 
 PENN_TO_UNIVERSAL = {
     '#': 'SYM',
@@ -72,6 +75,8 @@ UNIVERSAL_TO_DATAMUSE = {
 
 WHITESPACE_PATTERN = re.compile(r'\s+')
 
+WORD2VEC = spacy.load('en_vectors_web_lg')
+
 
 def word_count(text: str) -> int:
     return len(WHITESPACE_PATTERN.split(text))
@@ -98,3 +103,7 @@ def list_sums(lst, target, with_replacement=False):
             _a(u if w else (u + 1), l + [(u, lst[u])], r, t, w)
         return r
     return _a(0, [], [], target, with_replacement)
+
+
+def word_similarity(word1: str, word2: str) -> float:
+    return WORD2VEC(word1).similarity(word2)

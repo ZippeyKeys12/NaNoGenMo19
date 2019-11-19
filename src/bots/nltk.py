@@ -12,21 +12,12 @@ from ..abstracts import Bot
 
 class NLTKBot(Bot):
     def __init__(self, name: str, inst: Chat, sex: Optional[str] = None):
+        Bot.__init__(self, name, sex)
+
         self.inst = inst
-
-        self._info = {
-            'F': '[They:she][Them:her][Their:her][Theirs:hers]',
-            'M': '[They:he][Them:him][Their:his][Theirs:his]'
-        }.get(sex,
-              '[They:they][Them:them][Their:their][Theirs:theirs]')
-
-        self._info += '[Name:{}]'.format(name)
 
     def respond(self, text: str, **kwargs) -> str:
         return self.inst.respond(text)
-
-    def info(self) -> str:
-        return self._info
 
 
 def ElizaBot():

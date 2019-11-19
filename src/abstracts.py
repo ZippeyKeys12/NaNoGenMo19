@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from abc import abstractmethod
-from typing import Dict
+from typing import Optional
 
 
 class Generator:
@@ -45,9 +45,17 @@ class ComposedProcessor(Processor):
 
 
 class Bot:
-    @abstractmethod
+    def __init__(self, name: str, sex: Optional[str] = None):
+        self._info = {
+            'F': '[They:she][Them:her][Their:her][Theirs:hers]',
+            'M': '[They:he][Them:him][Their:his][Theirs:his]'
+        }.get(sex,
+              '[They:they][Them:them][Their:their][Theirs:theirs]')
+
+        self._info += '[Name:{}]'.format(name)
+
     def info(self) -> str:
-        raise NotImplementedError()
+        return self._info
 
     @abstractmethod
     def respond(self, text: str, **kwargs) -> str:
