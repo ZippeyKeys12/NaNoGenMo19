@@ -1,11 +1,24 @@
+import csv
 import datetime
+import re
 from collections import defaultdict
 from functools import lru_cache
-from typing import DefaultDict, Dict, List
+from typing import DefaultDict, Dict, List, Optional
 
+import nltk
 import pycorpora
+from faker.providers.person.en import Provider
+from nltk.corpus import names
 
 from ..util import word_similarity
+
+
+def get_pronouns(sex: Optional[str]) -> str:
+    return {
+        'F': '[They:she][Them:her][Their:her][Theirs:hers]',
+        'M': '[They:he][Them:him][Their:his][Theirs:his]'
+    }.get(details['sex'],
+          '[They:they][Them:them][Their:their][Theirs:theirs]')
 
 
 @lru_cache()
@@ -90,3 +103,64 @@ tarot_keywords = {x['name']: x['keywords'] for x in pycorpora.get_file(
 @lru_cache()
 def get_tarot_keywords(tarot_card: str) -> List[str]:
     return tarot_keywords[tarot_card]
+
+
+nltk.download('names')
+
+FIRST_NAMES_FEMALE = frozenset(
+    names.words('female.txt') +
+    list(Provider.first_names_female))
+
+FIRST_NAMES_MALE = frozenset(
+    names.words('male.txt') +
+    list(Provider.first_names_male))
+
+LAST_NAMES = frozenset(Provider.last_names)
+
+
+def name_meanings():
+    ret: Dict[str, List[str]] = {}
+
+    with open('data/names.csv') as csvfile:
+        name_pattern = re.compile(
+            r'(Pet form|From|Form|See|Dim\.) (of )?(the name )?([A-Z]+)( (or|&) ([A-Z]+))?')
+        names_reader = csv.reader(csvfile)
+
+        for row in names_reader:
+            name = row[0].lower().capitalize()
+
+            ret[name] = [row[1]]
+
+            if len(row) > 2 and row[2] != '':
+                ret[name].append(row[2])
+
+        for name in ret:
+            for i, meaning in enumerate(ret[name]):
+                match = name_pattern.match(meaning)
+
+                if match:
+                    try:
+                        new = ret[match.group(4).lower().capitalize()]
+                    except KeyError:
+                        continue
+
+                    ret[name][i] = new[0]
+
+                    if len(new) > 1:
+                        ret[name].extend(new[1:])
+
+                    if match.group(7):
+                        try:
+                            new = ret[match.group(7).lower().capitalize()]
+                        except KeyError:
+                            continue
+
+                        ret[name][i] = new[0]
+
+                        if len(new) > 1:
+                            ret[name].extend(new[1:])
+
+    return ret
+
+
+NAMES_MEANING: Dict[str, List[str]] = name_meanings()

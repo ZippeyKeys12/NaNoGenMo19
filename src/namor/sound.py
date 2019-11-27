@@ -1,7 +1,7 @@
 import os
 import random
 from os import path
-from typing import List, Tuple
+from typing import Dict, List, Tuple
 
 import pycorpora
 from pincelate import Pincelate
@@ -11,29 +11,33 @@ from .abstracts import Namor
 
 
 class SoundNamor(Namor):
-    def __init__(self, corpus: List[str]):
+    def __init__(self, corpus: Dict[str, List[str]]):
         self.pin = Pincelate()
 
-        corpus = [self.pin.soundout(x.lower()) for x in corpus]
+        corpus = {k: [self.pin.soundout(v.lower())
+                      for x in v] for k, v in corpus}
         max_length = max(map(len, corpus))
 
-        file_name = 'models/sound_namor.hdf5'
-        if path.isfile(file_name):
-            self.rnn = textgenrnn(file_name, name='sound_namor')
-        else:
-            self.rnn = textgenrnn()
-            self.rnn.train_on_texts(
-                [' '.join(x) for x in corpus],
-                num_epochs=10,
-                max_gen_length=max_length,
-                new_model=True)
-            # TODO: Finetune epoch count
+        self.rnn: Dict[str, textgenrnn] = {}
+        file_name = 'models/sound_namor_{}.hdf5'.format
+        for sex in {'F', 'M'}:
+            if path.isfile(file_name(sex)):
+                self.rnn[sex] = textgenrnn(file_name, name=file_name(sex))
 
-            self.rnn.save(file_name)
-            os.remove('textgenrnn_weights.hdf5')
+            else:
+                self.rnn[sex] = textgenrnn(name='sound_namor_{}'.format(sex))
+
+                self.rnn[sex].train_on_texts(
+                    [' '.join(x) for x in corpus[sex]],
+                    num_epochs=10,
+                    max_gen_length=max_length,
+                    new_model=True)
+                # TODO: Finetune epoch count
+
+                self.rnn[sex].save(file_name)
 
     def generate_name(self, sex: str) -> Tuple[str, str]:
-        return self.pin.spell(self.rnn.generate(
+        return self.pin.spell(self.rnn[sex].generate(
             return_as_list=True)[0].split(' ')).capitalize()
 
 

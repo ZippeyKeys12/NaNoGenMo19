@@ -11,7 +11,7 @@ from us import states
 
 from ..abstracts import Generator
 from ..shared import CleaningProcessor
-from ..debbi import get_astrological_sign, get_zodiac_sign
+from ..debbi import get_astrological_sign, get_zodiac_sign, get_pronouns
 
 
 class AutBioGenerator(Generator):
@@ -83,11 +83,7 @@ class AutBioGenerator(Generator):
 
         details.update(self.fake.profile(sex=None))
 
-        details['pronouns'] = {
-            'F': '[They:she][Them:her][Their:her][Theirs:hers]',
-            'M': '[They:he][Them:him][Their:his][Theirs:his]'
-        }.get(details['sex'],
-              '[They:they][Them:them][Their:their][Theirs:theirs]')
+        details['pronouns'] = get_pronouns(details['sex'])
 
         details['is_gay'] = random.random() < .0195
         details['is_married'] = random.random() < .43

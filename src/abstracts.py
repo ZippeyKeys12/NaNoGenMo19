@@ -3,6 +3,8 @@ from __future__ import annotations
 from abc import abstractmethod
 from typing import Optional
 
+from .debbi import get_pronouns
+
 
 class Generator:
     @abstractmethod
@@ -46,13 +48,7 @@ class ComposedProcessor(Processor):
 
 class Bot:
     def __init__(self, name: str, sex: Optional[str] = None):
-        self._info = {
-            'F': '[They:she][Them:her][Their:her][Theirs:hers]',
-            'M': '[They:he][Them:him][Their:his][Theirs:his]'
-        }.get(sex,
-              '[They:they][Them:them][Their:their][Theirs:theirs]')
-
-        self._info += '[Name:{}]'.format(name)
+        self._info = '[Name:{}]'.format(name)+get_pronouns(sex)
 
     def info(self) -> str:
         return self._info
